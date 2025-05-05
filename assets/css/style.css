@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Mono&family=Inter:wght@400;500&family=Poppins:wght@600;700&display=swap');
+
+body {
+  background-color: #0a0a0a;
+  color: #e0e0e0;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+h1, h2, h3 {
+  font-family: 'Poppins', sans-serif;
+  color: #ffffff;
+}
+
+a {
+  color: #b48dff;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+header, footer {
+  background-color: #101010;
+  border: 1px solid #1c1c1c;
+  padding: 1rem;
+  text-align: center;
+}
+
+.nav-container nav a {
+  margin: 0 1.2rem;
+  font-weight: 500;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  color: #c5c5c5;
+}
+
+.icon {
+  margin-right: 0.4rem;
+}
+
+main, .container {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 0 1.2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+ul li {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #1a1a1a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+ul li a {
+  font-family: 'Fira Mono', monospace;
+  font-size: 0.95rem;
+}
+
+img.avatar, img.avatar-large {
+  object-fit: cover;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #2d2d2d;
+  display: block;
+  margin: 0 auto 1.5rem;
+}
+
+img.avatar { width: 64px; height: 64px; }
+img.avatar-large { width: 128px; height: 128px; box-shadow: 0 0 0 3px #333; }
+
+.centered-intro {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+.centered-intro h1 {
+  margin: 0.2rem 0;
+  font-size: 1.8rem;
+}
+.centered-intro .tagline {
+  color: #888;
+  font-size: 1.0rem;
+}
+
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem;
+  display: block;
+  margin: 1.5rem auto;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
+}
+
+.cert-block {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+.cert-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding: 2rem;
+  background-color: #111;
+  border: 1px solid #333;
+  border-radius: 1rem;
+  max-width: 700px;
+  width: 100%;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+}
+
+.cert-bar a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  background-color: transparent;
+  padding: 0;
+  margin: 0;
+}
+
+.cert-bar img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
