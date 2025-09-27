@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ page.title }} | {{ site.title }}</title>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="icon" href="/public/avatar.png" type="image/png">
+  <script src="https://unpkg.com/feather-icons"></script>
+  {% seo %}
+</head>
+<body>
+  <header>
+    <div class="nav-container">
+      <nav>
+        <a href="/"><i data-feather="home"></i> Home</a>
+        <a href="/about.html"><i data-feather="user"></i> Whoami</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">{{ content }}</main>
+
+  <footer>
+    <p>© {{ site.time | date: '%Y' }} Himitsu</p>
+    <div class="social-icons">
+      <a href="https://github.com/NaotaClone" aria-label="GitHub"><i data-feather="github"></i></a>
+      <a href="https://himitsuflavor.medium.com/" aria-label="Medium"><i data-feather="sidebar"></i></a>
+      <a href="https://linkedin.com" aria-label="LinkedIn"><i data-feather="linkedin"></i></a>
+    </div>
+  </footer>
+
+  <script>feather.replace()</script>
+</body>
+</html>

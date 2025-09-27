@@ -1,0 +1,57 @@
+Listado de rutas de carpetas para el volumen NVM 2
+El número de serie del volumen es A8CA-1B43
+B:.
+¦   404.html
+¦   about.html
+¦   archive.html
+¦   favicon.ico
+¦   Gemfile
+¦   index.md
+¦   output.txt
+¦   README.md
+¦   _config.yml
+¦   
++---.github
+¦   +---workflows
+¦           pages.yml
+¦           
++---assets
+¦   +---css
+¦   ¦       style.css
+¦   ¦       
+¦   +---images
+¦       ¦   404_Pages.png
+¦       ¦   avatar.png
+¦       ¦   
+¦       +---certs
+¦       ¦       ecthp.png
+¦       ¦       osda.png
+¦       ¦       
+¦       +---post-icmp
+¦       ¦       cabezera.png
+¦       ¦       cabezera2.png
+¦       ¦       detection1.png
+¦       ¦       diagrama.png
+¦       ¦       diagrama2.png
+¦       ¦       diagrama3.png
+¦       ¦       example1.png
+¦       ¦       example2.png
+¦       ¦       example3.png
+¦       ¦       example4.png
+¦       ¦       example5.png
+¦       ¦       example6.png
+¦       ¦       pcap.png
+¦       ¦       
+¦       +---post-mfdoom
+¦               mfdoom.png
+¦               
++---src
+¦   +---pages
++---_layouts
+¦       default.html
+¦       post.html
+¦       
++---_posts
+        2025-05-04-mfdoom.md
+        2025-09-26-icmp-exfiltration.md
+        

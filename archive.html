@@ -1,0 +1,19 @@
+---
+layout: default
+title: Archive
+permalink: /archive.html
+---
+
+<div class="page-box">
+  <h2>📚 Blog Archive</h2>
+  <div class="index-posts-wrapper">
+    <ul>
+      {% for post in site.posts %}
+        <li>
+          <a href="{{ post.url }}">{{ post.title }}</a>
+          <small>{{ post.date | date: "%b %-d, %Y" }}</small>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
