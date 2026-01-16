@@ -1,6 +1,6 @@
 ---
 title: "Go Go Power Rangers (Anubis Ransomware - Caso COPEC)"
-date: 2026-01-18
+date: 2026-01-16
 tags: [ransomware, threat intelligence, purple team, blue team, threat hunting, CTI]
 ---
 > _Only with educational proposals | Este contenido tiene unicamente fines educativos_
@@ -296,3 +296,4 @@ rule Anubis_Ransomware_Himitsu
 }
 
 ```
+
