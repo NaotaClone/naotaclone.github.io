@@ -39,6 +39,8 @@ El operador afirma contar con la capacidad de generar reportes de compromiso en 
 
 > Es importante precisar que **Anubis Ransomware** no guarda relación con el **malware Anubis** orientado a dispositivos móviles (enfocado en robo de credenciales, interceptación de audio, captura de pantalla, keylogger, etc.).
 
+`**Sitio DLS**: https://om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd.onion`
+
 ## Análisis de "anubis.exe"
 
 Con el objetivo de identificar las **TTPs (Tácticas, Técnicas y Procedimientos)** empleadas por este actor ante la escasez de **Indicadores de Compromiso (IoC)** públicos, se tomó como referencia el indicador reportado por el [equipo de investigación de TrendMicro](https://www.trendmicro.com/content/dam/trendmicro/global/en/research/25/f/anubis--a-closer-look-at-an-emerging-ransomware-with-built-in-wiper/Anubis_A_Closer_Look_at_a_Emerging_Ransomware_with_Built-in_Wiper_IOCs.txt) el 13 de junio de 2025.
@@ -88,11 +90,11 @@ Por otro lado, la elevación de privilegios al momento de utilizar la opción **
 
 Adicionalmente, dentro de las numerosas bibliotecas exportadas desde GitHub señaladas en el punto anterior, el binario incorpora llamadas a **Syscalls** empleadas por **Sliver C2**. Entre las funciones identificadas destacan:
 
-* **GetProcessHeap** – Obtiene el *heap* del proceso actual para gestionar asignaciones internas.  
-* **HeapAlloc** – Reserva memoria dinámica en el *heap* del proceso, utilizada comúnmente para preparar estructuras o buffers antes de una inyección.  
-* **HeapFree** – Libera memoria previamente asignada, evitando dejar artefactos innecesarios en memoria.  
-* **InitializeProcThreadAttributeList** – Prepara estructuras avanzadas de atributos para creación de procesos bajo condiciones controladas *(Ej PPID spoofing o process hollowing)*.  
-* **UpdateProcThreadAttribute** – Actualiza los atributos de la estructura anterior, permitiendo redireccionar handles, mapear memoria o configurar herencia de procesos modificada.
+* **GetProcessHeap**: Obtiene el *heap* del proceso actual para gestionar asignaciones internas.  
+* **HeapAlloc**: Reserva memoria dinámica en el *heap* del proceso, utilizada comúnmente para preparar estructuras o buffers antes de una inyección.  
+* **HeapFree**: Libera memoria previamente asignada, evitando dejar artefactos innecesarios en memoria.  
+* **InitializeProcThreadAttributeList**: Prepara estructuras avanzadas de atributos para creación de procesos bajo condiciones controladas *(Ej PPID spoofing o process hollowing)*.  
+* **UpdateProcThreadAttribute**: Actualiza los atributos de la estructura anterior, permitiendo redireccionar handles, mapear memoria o configurar herencia de procesos modificada.
 
 ![Imagen DLS - discovery](/assets/images/anubis/sliver.png)
 
@@ -295,3 +297,4 @@ rule Anubis_Ransomware_Himitsu
     and 1 of ($slv1, $slv2, $slv3, $slv4)
 }
 ```
+
