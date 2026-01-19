@@ -39,7 +39,8 @@ El operador afirma contar con la capacidad de generar reportes de compromiso en 
 
 > Es importante precisar que **Anubis Ransomware** no guarda relación con el **malware Anubis** orientado a dispositivos móviles (enfocado en robo de credenciales, interceptación de audio, captura de pantalla, keylogger, etc.).
 
-`Sitio DLS: https://om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd.onion`
+`Sitio DLS: https://om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd.onion
+Sitio comunicación: 6g3aoky5hft4mvzcqt2bugo4r465woaorjhd7em2k2v24sr2exaro5id.onion`
 
 ## Análisis de "anubis.exe"
 
@@ -162,6 +163,9 @@ En paralelo el **Ransomware** genera multiples tareas como:
 > **Cabe destacar que el actor genera la nota de rescate en un formato html**.
 > ![Imagen DLS - discovery](/assets/images/anubis/notarescate.png)
 
+Se puede observar que la nota de rescate señala el sitio **6g3aoky5hft4mvzcqt2bugo4r465woaorjhd7em2k2v24sr2exaro5id.onion** cual corresponde a la sala de conversaciones del actor de amenaza para negociar el rescate.
+
+![Imagen DLS - chat](/assets/images/anubis/chat.png)
 
 ### Bibliotecas de Terceros (GitHub)
 
@@ -297,5 +301,6 @@ rule Anubis_Ransomware_Himitsu
     and 1 of ($slv1, $slv2, $slv3, $slv4)
 }
 ```
+
 
 
