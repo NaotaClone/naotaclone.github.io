@@ -39,8 +39,8 @@ El operador afirma contar con la capacidad de generar reportes de compromiso en 
 
 > Es importante precisar que **Anubis Ransomware** no guarda relación con el **malware Anubis** orientado a dispositivos móviles (enfocado en robo de credenciales, interceptación de audio, captura de pantalla, keylogger, etc.).
 
-`Sitio DLS: https://om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd.onion`
-`Sitio comunicación: 6g3aoky5hft4mvzcqt2bugo4r465woaorjhd7em2k2v24sr2exaro5id.onion`
+* **Sitio DLS**: https://om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd.onion
+* **Sitio comunicación**: 6g3aoky5hft4mvzcqt2bugo4r465woaorjhd7em2k2v24sr2exaro5id.onion
 
 ## Análisis de "anubis.exe"
 
@@ -301,6 +301,7 @@ rule Anubis_Ransomware_Himitsu
     and 1 of ($slv1, $slv2, $slv3, $slv4)
 }
 ```
+
 
 
 
